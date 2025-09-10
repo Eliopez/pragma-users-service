@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LoggerManager.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">helpers</a> &gt; <a href="index.source.html" class="el_package">co.com.pragma.logger</a> &gt; <span class="el_source">LoggerManager.java</span></div><h1>LoggerManager.java</h1><pre class="source lang-java linenums">package co.com.pragma.logger;
+
+import co.com.pragma.model.common.Logger;
+import co.com.pragma.model.common.LogLevel;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+/**
+ * Singleton Logger Manager that provides logger instances for different classes.
+ * This implementation uses SLF4J as the underlying logging framework.
+ * Thread-safe implementation using double-checked locking pattern.
+ */
+public class LoggerManager {
+    
+    private static volatile LoggerManager instance;
+    private final ConcurrentMap&lt;String, Logger&gt; loggers;
+    private volatile LogLevel minimumLogLevel;
+    
+<span class="fc" id="L21">    private LoggerManager() {</span>
+<span class="fc" id="L22">        this.loggers = new ConcurrentHashMap&lt;&gt;();</span>
+<span class="fc" id="L23">        this.minimumLogLevel = LogLevel.INFO; // Default log level</span>
+<span class="fc" id="L24">    }</span>
+    
+    /**
+     * Get the singleton instance of LoggerManager
+     * @return LoggerManager instance
+     */
+    public static LoggerManager getInstance() {
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        if (instance == null) {</span>
+<span class="fc" id="L32">            synchronized (LoggerManager.class) {</span>
+<span class="pc bpc" id="L33" title="1 of 2 branches missed.">                if (instance == null) {</span>
+<span class="fc" id="L34">                    instance = new LoggerManager();</span>
+                }
+<span class="fc" id="L36">            }</span>
+        }
+<span class="fc" id="L38">        return instance;</span>
+    }
+    
+    /**
+     * Get a logger for the specified class
+     * @param clazz The class to get logger for
+     * @return Logger instance
+     */
+    public Logger getLogger(Class&lt;?&gt; clazz) {
+<span class="fc" id="L47">        return getLogger(clazz.getName());</span>
+    }
+    
+    /**
+     * Get a logger for the specified name
+     * @param name The logger name
+     * @return Logger instance
+     */
+    public Logger getLogger(String name) {
+<span class="fc" id="L56">        return loggers.computeIfAbsent(name, this::createLogger);</span>
+    }
+    
+    /**
+     * Set the minimum log level for all loggers
+     * @param level The minimum log level
+     */
+    public void setMinimumLogLevel(LogLevel level) {
+<span class="fc" id="L64">        this.minimumLogLevel = level;</span>
+<span class="fc" id="L65">    }</span>
+    
+    /**
+     * Get the current minimum log level
+     * @return Current minimum log level
+     */
+    public LogLevel getMinimumLogLevel() {
+<span class="fc" id="L72">        return minimumLogLevel;</span>
+    }
+    
+    /**
+     * Create a new logger instance
+     * @param name The logger name
+     * @return New logger instance
+     */
+    private Logger createLogger(String name) {
+<span class="fc" id="L81">        return new Slf4jLoggerAdapter(LoggerFactory.getLogger(name), this);</span>
+    }
+    
+    /**
+     * Clear all cached loggers (useful for testing)
+     */
+    public void clearLoggers() {
+<span class="fc" id="L88">        loggers.clear();</span>
+<span class="fc" id="L89">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,0 +1,40 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: "pragma-users-service"
+  devtools:
+    add-properties: false
+  profiles:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+
+springdoc:
+  swagger-ui:
+    path: "/api/doc/swagger-ui.html"
+  api-docs:
+    path: "/api/doc/api-docs"
+
+routes:
+  paths:
+    users: "/api/users"
+    users-by-id: "/api/users/{id}"
+
+adapters:
+  r2dbc:
+    host: "localhost"
+    port: 5432
+    database: "pragma"
+    schema: "public"
+    username: "admin"
+    password: "admin"
